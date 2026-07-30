@@ -1,7 +1,8 @@
 #pragma once
 
 #include <string>
-#include <GLFW/glfw3.h>
+
+struct GLFWwindow;
 
 class Window
 {
@@ -10,15 +11,19 @@ public:
     Window();
     ~Window();
 
-    bool Create(int width,
-                int height,
-                const std::string& title);
+    bool Create(
+        int width,
+        int height,
+        const std::string& title
+    );
 
-    void Update();
+    void PollEvents();
 
-    void Shutdown();
+    void SwapBuffers();
 
     bool ShouldClose() const;
+
+    void Destroy();
 
     GLFWwindow* GetNativeWindow() const;
 
@@ -28,4 +33,6 @@ private:
 
     int m_Width;
     int m_Height;
+
+    std::string m_Title;
 };

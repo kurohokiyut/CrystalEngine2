@@ -7,14 +7,28 @@
 
 CubeMesh::CubeMesh()
 {
+    VAO = 0;
+    VBO = 0;
+    EBO = 0;
 }
 
 CubeMesh::~CubeMesh()
 {
+    Shutdown();
 }
 
-bool CubeMesh::Initialize()
+bool CubeMesh::Create(
+    const float* vertices,
+    size_t vertexSize,
+    const unsigned int* indices,
+    size_t indexCount
+)
 {
+    return true;
+}
+
+bool CubeMesh::Initialize(){
+
     static const float vertices[] =
     {
         // Back

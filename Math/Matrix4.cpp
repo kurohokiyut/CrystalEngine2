@@ -63,11 +63,11 @@ Matrix4 Matrix4::LookAt(
     const Vector3& target,
     const Vector3& up)
 {
-    Vector3 forward =
-        (target - eye).Normalize();
+    Vector3 forward = target - eye;
+    forward.Normalize();
 
-    Vector3 right =
-        forward.Cross(up).Normalize();
+    Vector3 right = forward.Cross(up);
+    right.Normalize();
 
     Vector3 newUp =
         right.Cross(forward);

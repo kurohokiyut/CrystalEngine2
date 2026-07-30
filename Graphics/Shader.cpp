@@ -1,11 +1,11 @@
-//======================================================
-// CrystalEngine
-// Shader.cpp
-//======================================================
-
 #include "Shader.h"
+#include <glm/gtc/type_ptr.hpp>
 
+#include <fstream>
 #include <iostream>
+#include <sstream>
+
+#include <glad/glad.h>
 
 Shader::Shader()
 {
@@ -17,95 +17,89 @@ Shader::~Shader()
     Destroy();
 }
 
-GLuint Shader::Compile(GLenum type, const char* source)
+std::string Shader::ReadFile(const std::string& path)
 {
-    GLuint shader = glCreateShader(type);
+    std::ifstream file(path);
 
-    glShaderSource(shader,
-                   1,
-                   &source,
-                   nullptr);
+    if (!file.is_open())
+    {
+        std::cout << "Cannot open shader : "
+                  << path
+                  << std::endl;
+
+        return "";
+    }
+
+    std::stringstream ss;
+    ss << file.rdbuf();
+
+    return ss.str();
+}
+
+unsigned int Shader::CompileShader(
+    unsigned int type,
+    const std::string& source)
+{
+    unsigned int shader = glCreateShader(type);
+
+    const char* src = source.c_str();
+
+    glShaderSource(shader, 1, &src, nullptr);
 
     glCompileShader(shader);
 
-    GLint success = GL_FALSE;
+    int success;
 
-    glGetShaderiv(shader,
-                  GL_COMPILE_STATUS,
-                  &success);
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
     if (!success)
     {
-        char log[2048];
+        char log[1024];
 
-        glGetShaderInfoLog(shader,
-                           sizeof(log),
-                           nullptr,
-                           log);
-
-        std::cout
-            << "==============================\n";
-
-        if (type == GL_VERTEX_SHADER)
-        {
-            std::cout
-                << "Vertex Shader Compile Error\n";
-        }
-        else
-        {
-            std::cout
-                << "Fragment Shader Compile Error\n";
-        }
+        glGetShaderInfoLog(
+            shader,
+            1024,
+            nullptr,
+            log
+        );
 
         std::cout
+            << "Shader Compile Error\n"
             << log
             << std::endl;
-
-        glDeleteShader(shader);
-
-        return 0;
     }
 
     return shader;
 }
 
 bool Shader::Load(
-    const char* vertexSource,
-    const char* fragmentSource)
+    const std::string& vertexPath,
+    const std::string& fragmentPath)
 {
-    GLuint vertex =
-        Compile(
+    std::string vertexSource =
+        ReadFile(vertexPath);
+
+    std::string fragmentSource =
+        ReadFile(fragmentPath);
+
+    unsigned int vertex =
+        CompileShader(
             GL_VERTEX_SHADER,
             vertexSource);
 
-    if (vertex == 0)
-        return false;
-
-    GLuint fragment =
-        Compile(
+    unsigned int fragment =
+        CompileShader(
             GL_FRAGMENT_SHADER,
             fragmentSource);
 
-    if (fragment == 0)
-    {
-        glDeleteShader(vertex);
-        return false;
-    }
-
     m_Program = glCreateProgram();
 
-    glAttachShader(
-        m_Program,
-        vertex);
+    glAttachShader(m_Program, vertex);
+    glAttachShader(m_Program, fragment);
 
-    glAttachShader(
-        m_Program,
-        fragment);
+    glLinkProgram(m_Program);
 
-    glLinkProgram(
-        m_Program);
-
-    GLint success = GL_FALSE;
+    int success;
 
     glGetProgramiv(
         m_Program,
@@ -114,48 +108,24 @@ bool Shader::Load(
 
     if (!success)
     {
-        char log[2048];
+        char log[1024];
 
         glGetProgramInfoLog(
             m_Program,
-            sizeof(log),
+            1024,
             nullptr,
             log);
 
         std::cout
-            << "==============================\n";
-
-        std::cout
-            << "Shader Link Error\n";
-
-        std::cout
+            << "Program Link Error\n"
             << log
             << std::endl;
-
-        glDeleteShader(vertex);
-        glDeleteShader(fragment);
-
-        glDeleteProgram(m_Program);
-
-        m_Program = 0;
 
         return false;
     }
 
-    glDetachShader(
-        m_Program,
-        vertex);
-
-    glDetachShader(
-        m_Program,
-        fragment);
-
     glDeleteShader(vertex);
-
     glDeleteShader(fragment);
-
-    std::cout
-        << "[Shader] Successfully Compiled\n";
 
     return true;
 }
@@ -175,12 +145,27 @@ void Shader::Destroy()
     if (m_Program != 0)
     {
         glDeleteProgram(m_Program);
-
         m_Program = 0;
     }
 }
 
-GLuint Shader::GetProgram() const
+unsigned int Shader::GetProgram() const
 {
     return m_Program;
+}
+
+void Shader::SetMat4(
+    const std::string& name,
+    const glm::mat4& matrix)
+{
+    unsigned int location =
+        glGetUniformLocation(
+            m_Program,
+            name.c_str());
+
+    glUniformMatrix4fv(
+        location,
+        1,
+        GL_FALSE,
+        glm::value_ptr(matrix));
 }

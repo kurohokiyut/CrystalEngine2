@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(CrystalEngine VERSION 0.0.1 LANGUAGES CXX)
+project(CrystalEngine VERSION 0.0.1 LANGUAGES C CXX)
 
 # ==========================================
 # C++17
@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenGL REQUIRED)
 
 # ==========================================
-# GLFW (Binary)
+# GLFW (Linux Build)
 # ==========================================
 
 set(GLFW_INCLUDE_DIR
@@ -24,7 +24,7 @@ set(GLFW_INCLUDE_DIR
 )
 
 set(GLFW_LIBRARY
-    ${CMAKE_SOURCE_DIR}/External/glfw/lib/glfw3.lib
+    ${CMAKE_SOURCE_DIR}/External/glfw/build/src/libglfw3.a
 )
 
 # ==========================================
@@ -56,13 +56,13 @@ set(SOURCES
     Graphics/Camera.cpp
     Graphics/Mesh.cpp
     Graphics/CubeMesh.cpp
+    Graphics/VertexArray.cpp
+    Graphics/VertexBuffer.cpp
+    Graphics/IndexBuffer.cpp
 
-    Math/Vector2.cpp
-    Math/Vector3.cpp
     Math/Matrix4.cpp
-    Math/Quaternion.cpp
-    Math/Transform.cpp
-
+    
+    CrystalPhysics/Vector3.cpp
     CrystalPhysics/RigidBody.cpp
     CrystalPhysics/Gravity.cpp
     CrystalPhysics/Collider.cpp
@@ -70,6 +70,9 @@ set(SOURCES
     CrystalPhysics/PhysicsWorld.cpp
 
     Debug/DebugRenderer.cpp
+    Debug/DebugRenderer.h
+    Debug/DebugText.cpp
+    Debug/DebugText.h
 )
 
 # ==========================================
@@ -91,6 +94,7 @@ target_include_directories(CrystalEngine PRIVATE
     ${GLFW_INCLUDE_DIR}
 
     External/glad/include
+    External/glm
 
     Core
     Graphics
@@ -106,10 +110,11 @@ target_include_directories(CrystalEngine PRIVATE
 target_link_libraries(CrystalEngine PRIVATE
 
     glad
-
     ${GLFW_LIBRARY}
-
     OpenGL::GL
+    X11
+    pthread
+    dl
 )
 
 # ==========================================

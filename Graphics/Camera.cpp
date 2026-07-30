@@ -1,49 +1,76 @@
-//======================================================
-// CrystalEngine
-// Camera.cpp
-//======================================================
-
 #include "Camera.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 Camera::Camera()
 {
-    // カメラ位置
-    m_Position = Vector3(0.0f, 0.0f, 3.0f);
-
-    // 原点を見る
-    m_Target = Vector3(0.0f, 0.0f, 0.0f);
-
-    Update();
 }
 
 Camera::~Camera()
 {
 }
 
-void Camera::SetPosition(const Vector3& position)
+void Camera::Initialize(
+    float width,
+    float height)
 {
-    m_Position = position;
+    m_Position =
+        glm::vec3(
+            0.0f,
+            0.0f,
+            3.0f);
 
-    Update();
-}
+    m_Target =
+        glm::vec3(
+            0.0f,
+            0.0f,
+            0.0f);
 
-void Camera::SetTarget(const Vector3& target)
-{
-    m_Target = target;
+    m_Up =
+        glm::vec3(
+            0.0f,
+            1.0f,
+            0.0f);
 
-    Update();
+    m_View =
+        glm::lookAt(
+            m_Position,
+            m_Target,
+            m_Up);
+
+    m_Projection =
+        glm::perspective(
+
+            glm::radians(45.0f),
+
+            width / height,
+
+            0.1f,
+
+            100.0f
+        );
 }
 
 void Camera::Update()
 {
-    // View行列を作成
-    m_View = Matrix4::LookAt(
-        m_Position,
-        m_Target,
-        Vector3(0.0f, 1.0f, 0.0f));
+    m_View =
+        glm::lookAt(
+            m_Position,
+            m_Target,
+            m_Up);
 }
 
-const Matrix4& Camera::GetViewMatrix() const
+glm::mat4 Camera::GetViewMatrix() const
 {
     return m_View;
+}
+
+glm::mat4 Camera::GetProjectionMatrix() const
+{
+    return m_Projection;
+}
+
+glm::vec3& Camera::Position()
+{
+    return m_Position;
 }

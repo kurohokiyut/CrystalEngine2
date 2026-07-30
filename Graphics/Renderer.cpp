@@ -1,16 +1,10 @@
-//======================================================
-// CrystalEngine
-// Renderer.cpp
-//======================================================
-
 #include "Renderer.h"
-
-#include <iostream>
-
+#include "CubeMesh.h"
 #include <glad/glad.h>
 
 Renderer::Renderer()
 {
+    m_Cube = nullptr;
 }
 
 Renderer::~Renderer()
@@ -19,61 +13,102 @@ Renderer::~Renderer()
 
 bool Renderer::Initialize()
 {
-    std::cout << "[Renderer] Initializing...\n";
-
     glEnable(GL_DEPTH_TEST);
 
-    glEnable(GL_CULL_FACE);
+    glClearColor(
+        0.15f,
+        0.15f,
+        0.18f,
+        1.0f
+    );
 
-    glCullFace(GL_BACK);
+    return true;
 
-    glFrontFace(GL_CCW);
+       shader.Load(
+        "Assets/Shaders/Default.vert",
+        "Assets/Shaders/Default.frag"
+    );
 
-    std::cout << "[Renderer] Ready\n";
+    camera.Initialize(
+        1280.0f,
+        720.0f
+    );
+
+    cubeMesh.Initialize();
 
     return true;
 }
 
 void Renderer::Begin()
 {
-    glClearColor(
-        0.10f,
-        0.12f,
-        0.16f,
-        1.0f);
-
     glClear(
         GL_COLOR_BUFFER_BIT |
-        GL_DEPTH_BUFFER_BIT);
+        GL_DEPTH_BUFFER_BIT
+    );
 }
 
 void Renderer::DrawCube()
 {
-    //--------------------------------------------------
-    // Temporary
-    //--------------------------------------------------
-    //
-    // v0.0.1 Alphaでは
-    // Cube描画はまだ実装しない。
-    //
-    // 次のバージョンで
-    //
-    // VAO
-    // VBO
-    // EBO
-    // Shader
-    //
-    // を追加する。
-    //
-    //--------------------------------------------------
+    shader.Bind();
+
+    glm::mat4 model(1.0f);
+
+    shader.SetMat4(
+        "uModel",
+        model);
+
+    shader.SetMat4(
+        "uView",
+        camera.GetViewMatrix());
+
+    shader.SetMat4(
+        "uProjection",
+        camera.GetProjectionMatrix());
+
+    cubeMesh.Draw();
 }
 
 void Renderer::End()
 {
-    glFlush();
+
 }
 
 void Renderer::Shutdown()
 {
-    std::cout << "[Renderer] Shutdown\n";
+    if(m_Cube)
+    {
+        m_Cube->Shutdown();
+    }
+}
+
+void CubeMesh::Draw()
+{
+    glBindVertexArray(VAO);
+
+    glDrawElements(
+        GL_TRIANGLES,
+        36,
+        GL_UNSIGNED_INT,
+        nullptr
+    );
+
+    glBindVertexArray(0);
+}
+
+
+void CubeMesh::Shutdown()
+{
+    if(EBO)
+        glDeleteBuffers(1, &EBO);
+
+    if(VBO)
+        glDeleteBuffers(1, &VBO);
+
+    if(VAO)
+        glDeleteVertexArrays(1, &VAO);
+
+
+    VAO = 0;
+    VBO = 0;
+    EBO = 0;
 }

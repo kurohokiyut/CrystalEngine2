@@ -1,14 +1,29 @@
 #pragma once
+#include <cstddef>
 
-#include "Mesh.h"
-
-class CubeMesh : public Mesh
+class CubeMesh
 {
 public:
 
     CubeMesh();
-
-    virtual ~CubeMesh();
+    ~CubeMesh();
 
     bool Initialize();
+
+    void Draw();
+
+    void Shutdown();
+
+    bool Create(
+    const float* vertices,
+    size_t vertexSize,
+    const unsigned int* indices,
+    size_t indexCount
+);
+
+private:
+
+    unsigned int VAO;
+    unsigned int VBO;
+    unsigned int EBO;
 };

@@ -1,24 +1,21 @@
-//======================================================
-// CrystalEngine
-// Window.cpp
-//======================================================
-
 #include "Window.h"
 
 #include <iostream>
 
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 Window::Window()
 {
     m_Window = nullptr;
+
     m_Width = 0;
     m_Height = 0;
 }
 
 Window::~Window()
 {
-    Shutdown();
+    Destroy();
 }
 
 bool Window::Create(
@@ -28,55 +25,33 @@ bool Window::Create(
 {
     m_Width = width;
     m_Height = height;
-
-    //------------------------------------
-    // GLFW
-    //------------------------------------
+    m_Title = title;
 
     if (!glfwInit())
     {
-        std::cout
-            << "[Window] GLFW Initialization Failed"
-            << std::endl;
-
+        std::cout << "GLFW Init Failed\n";
         return false;
     }
 
-    //------------------------------------
-    // OpenGL Version
-    //------------------------------------
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
 
     glfwWindowHint(
         GLFW_OPENGL_PROFILE,
-        GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-
-    glfwWindowHint(
-        GLFW_OPENGL_FORWARD_COMPAT,
-        GL_TRUE);
-
-#endif
-
-    //------------------------------------
-    // Window
-    //------------------------------------
+        GLFW_OPENGL_CORE_PROFILE
+    );
 
     m_Window = glfwCreateWindow(
         width,
         height,
         title.c_str(),
         nullptr,
-        nullptr);
+        nullptr
+    );
 
     if (m_Window == nullptr)
     {
-        std::cout
-            << "[Window] Failed to Create Window"
-            << std::endl;
+        std::cout << "Window Create Failed\n";
 
         glfwTerminate();
 
@@ -85,68 +60,38 @@ bool Window::Create(
 
     glfwMakeContextCurrent(m_Window);
 
-    //------------------------------------
-    // VSYNC
-    //------------------------------------
-
-    glfwSwapInterval(1);
-
-    //------------------------------------
-    // GLAD
-    //------------------------------------
-
     if (!gladLoadGLLoader(
         (GLADloadproc)glfwGetProcAddress))
     {
-        std::cout
-            << "[Window] Failed to Initialize GLAD"
-            << std::endl;
+        std::cout << "GLAD Failed\n";
 
         return false;
     }
-
-    //------------------------------------
-    // Viewport
-    //------------------------------------
 
     glViewport(
         0,
         0,
         width,
-        height);
-
-    //------------------------------------
-    // Resize Callback
-    //------------------------------------
-
-    glfwSetFramebufferSizeCallback(
-
-        m_Window,
-
-        [](GLFWwindow*, int w, int h)
-        {
-            glViewport(0, 0, w, h);
-        }
-
+        height
     );
 
-    std::cout
-        << "[Window] Successfully Created"
-        << std::endl;
+    glfwSwapInterval(1);
 
     std::cout
-        << "OpenGL Version : "
-        << glGetString(GL_VERSION)
+        << "CrystalEngine Window Created"
         << std::endl;
 
     return true;
 }
 
-void Window::Update()
+void Window::PollEvents()
+{
+    glfwPollEvents();
+}
+
+void Window::SwapBuffers()
 {
     glfwSwapBuffers(m_Window);
-
-    glfwPollEvents();
 }
 
 bool Window::ShouldClose() const
@@ -154,12 +99,7 @@ bool Window::ShouldClose() const
     return glfwWindowShouldClose(m_Window);
 }
 
-GLFWwindow* Window::GetNativeWindow() const
-{
-    return m_Window;
-}
-
-void Window::Shutdown()
+void Window::Destroy()
 {
     if (m_Window != nullptr)
     {
@@ -169,4 +109,9 @@ void Window::Shutdown()
     }
 
     glfwTerminate();
+}
+
+GLFWwindow* Window::GetNativeWindow() const
+{
+    return m_Window;
 }

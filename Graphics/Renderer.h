@@ -1,7 +1,8 @@
 #pragma once
 
+#include "CubeMesh.h"
 #include "Shader.h"
-#include "Mesh.h"
+#include "Camera.h"
 
 class Renderer
 {
@@ -12,13 +13,21 @@ public:
 
     bool Initialize();
 
-    void BeginFrame();
+    void Begin();
 
-    void Draw(
-        Shader& shader,
-        Mesh& mesh);
+    void DrawCube();
 
-    void EndFrame();
+    void End();
 
     void Shutdown();
+
+private:
+
+    CubeMesh cubeMesh;
+
+    Shader shader;
+
+    Camera camera;
+
+    CubeMesh* m_Cube;
 };

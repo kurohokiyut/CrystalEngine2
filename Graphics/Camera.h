@@ -1,27 +1,34 @@
 #pragma once
 
-#include "../Math/Vector3.h"
-#include "../Math/Matrix4.h"
+#include <glm/glm.hpp>
 
 class Camera
 {
 public:
 
     Camera();
+
     ~Camera();
 
-    void SetPosition(const Vector3& position);
-
-    void SetTarget(const Vector3& target);
-
-    const Matrix4& GetViewMatrix() const;
+    void Initialize(
+        float width,
+        float height
+    );
 
     void Update();
 
+    glm::mat4 GetViewMatrix() const;
+
+    glm::mat4 GetProjectionMatrix() const;
+
+    glm::vec3& Position();
+
 private:
 
-    Vector3 m_Position;
-    Vector3 m_Target;
+    glm::vec3 m_Position;
+    glm::vec3 m_Target;
+    glm::vec3 m_Up;
 
-    Matrix4 m_View;
+    glm::mat4 m_View;
+    glm::mat4 m_Projection;
 };

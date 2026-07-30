@@ -16,15 +16,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenGL REQUIRED)
 
 # ==========================================
-# GLFW (Linux Build)
+# GLFW
 # ==========================================
 
-set(GLFW_INCLUDE_DIR
-    ${CMAKE_SOURCE_DIR}/External/glfw/include
-)
-
-set(GLFW_LIBRARY
-    ${CMAKE_SOURCE_DIR}/External/glfw/build/src/libglfw3.a
+target_link_libraries(CrystalEngine PRIVATE
+    glad
+    glfw
+    OpenGL::GL
 )
 
 # ==========================================
@@ -91,9 +89,8 @@ target_include_directories(CrystalEngine PRIVATE
 
     .
 
-    ${GLFW_INCLUDE_DIR}
-
     External/glad/include
+    External/glfw/include
     External/glm
 
     Core
@@ -110,11 +107,9 @@ target_include_directories(CrystalEngine PRIVATE
 target_link_libraries(CrystalEngine PRIVATE
 
     glad
-    ${GLFW_LIBRARY}
+    glfw
     OpenGL::GL
-    X11
-    pthread
-    dl
+
 )
 
 # ==========================================

@@ -1,114 +1,100 @@
 #include "Renderer.h"
-#include "CubeMesh.h"
+
 #include <glad/glad.h>
-
-Renderer::Renderer()
-{
-    m_Cube = nullptr;
-}
-
-Renderer::~Renderer()
-{
-}
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 bool Renderer::Initialize()
 {
     glEnable(GL_DEPTH_TEST);
 
-    glClearColor(
-        0.15f,
-        0.15f,
-        0.18f,
-        1.0f
-    );
+    if (!shader.Load(
+        "Assets/Shaders/Basic.vert",
+        "Assets/Shaders/Basic.frag"))
+    {
+        return false;
+    }
 
-    return true;
-
-       shader.Load(
-        "Assets/Shaders/Default.vert",
-        "Assets/Shaders/Default.frag"
-    );
-
-    camera.Initialize(
-        1280.0f,
-        720.0f
-    );
-
-    cubeMesh.Initialize();
+    if (!cubeMesh.Initialize())
+    {
+        return false;
+    }
 
     return true;
 }
 
 void Renderer::Begin()
 {
+    glClearColor(
+        0.05f,
+        0.05f,
+        0.05f,
+        1.0f);
+
     glClear(
         GL_COLOR_BUFFER_BIT |
-        GL_DEPTH_BUFFER_BIT
-    );
+        GL_DEPTH_BUFFER_BIT);
+
+    shader.Use();
 }
 
 void Renderer::DrawCube()
 {
-    shader.Bind();
+    shader.Use();
 
-    glm::mat4 model(1.0f);
+    glm::mat4 model =
+        glm::mat4(1.0f);
+
+    glm::mat4 view =
+        glm::lookAt(
+
+            glm::vec3(
+                0.0f,
+                0.0f,
+                3.0f),
+
+            glm::vec3(
+                0.0f,
+                0.0f,
+                0.0f),
+
+            glm::vec3(
+                0.0f,
+                1.0f,
+                0.0f)
+        );
+
+    glm::mat4 projection =
+        glm::perspective(
+
+            glm::radians(45.0f),
+
+            1280.0f / 720.0f,
+
+            0.1f,
+
+            100.0f
+        );
+
+    glm::mat4 mvp =
+        projection *
+        view *
+        model;
 
     shader.SetMat4(
-        "uModel",
-        model);
-
-    shader.SetMat4(
-        "uView",
-        camera.GetViewMatrix());
-
-    shader.SetMat4(
-        "uProjection",
-        camera.GetProjectionMatrix());
+        "uMVP",
+        mvp);
 
     cubeMesh.Draw();
 }
 
 void Renderer::End()
 {
-
 }
 
 void Renderer::Shutdown()
 {
-    if(m_Cube)
-    {
-        m_Cube->Shutdown();
-    }
-}
+    cubeMesh.Destroy();
 
-void CubeMesh::Draw()
-{
-    glBindVertexArray(VAO);
-
-    glDrawElements(
-        GL_TRIANGLES,
-        36,
-        GL_UNSIGNED_INT,
-        nullptr
-    );
-
-    glBindVertexArray(0);
-}
-
-
-void CubeMesh::Shutdown()
-{
-    if(EBO)
-        glDeleteBuffers(1, &EBO);
-
-    if(VBO)
-        glDeleteBuffers(1, &VBO);
-
-    if(VAO)
-        glDeleteVertexArrays(1, &VAO);
-
-
-    VAO = 0;
-    VBO = 0;
-    EBO = 0;
+    shader.Destroy();
 }

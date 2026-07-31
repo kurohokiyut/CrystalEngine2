@@ -1,5 +1,6 @@
 #pragma once
-#include <cstddef>
+
+#include <glad/glad.h>
 
 class CubeMesh
 {
@@ -12,18 +13,11 @@ public:
 
     void Draw();
 
-    void Shutdown();
-
-    bool Create(
-    const float* vertices,
-    size_t vertexSize,
-    const unsigned int* indices,
-    size_t indexCount
-);
+    void Destroy();
 
 private:
 
-    unsigned int VAO;
-    unsigned int VBO;
-    unsigned int EBO;
+    GLuint VAO = 0;
+    GLuint VBO = 0;
+    GLuint EBO = 0;
 };

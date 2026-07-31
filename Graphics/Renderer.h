@@ -1,15 +1,12 @@
 #pragma once
 
-#include "CubeMesh.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "CubeMesh.h"
 
 class Renderer
 {
 public:
-
-    Renderer();
-    ~Renderer();
 
     bool Initialize();
 
@@ -23,11 +20,9 @@ public:
 
 private:
 
-    CubeMesh cubeMesh;
-
     Shader shader;
 
     Camera camera;
 
-    CubeMesh* m_Cube;
+    CubeMesh cubeMesh;
 };

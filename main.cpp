@@ -13,6 +13,7 @@ int main()
         return -1;
     }
 
+
     Renderer renderer;
 
     if (!renderer.Initialize())
@@ -21,9 +22,11 @@ int main()
         return -1;
     }
 
+
     while (!window.ShouldClose())
     {
         window.PollEvents();
+
 
         renderer.Begin();
 
@@ -31,12 +34,15 @@ int main()
 
         renderer.End();
 
+
         window.SwapBuffers();
     }
+
 
     renderer.Shutdown();
 
     window.Destroy();
+
 
     return 0;
 }

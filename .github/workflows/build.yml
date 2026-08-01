@@ -63,10 +63,16 @@ jobs:
           @"
           CrystalEngine Windows build
           ---------------------------
+          Publisher: Crystal Developer
+
           This artifact is built by GitHub Actions.
           If a code signing certificate is configured via repository secrets,
           the executable will be signed automatically.
           Without signing, Windows Defender may still show a warning.
+
+          To avoid false positives, use the ZIP package and run the executable only
+          if you trust this build source. Code signing is the reliable way to
+          reduce Windows Defender warnings.
           "@ | Set-Content -Path $notePath -Encoding UTF8
 
           $zipPath = Join-Path $PWD "CrystalEngine-Windows.zip"

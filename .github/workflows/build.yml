@@ -45,11 +45,21 @@ jobs:
             $certPassword = $null
 
             if ($env:WINDOWS_PFX_BASE64 -and $env:WINDOWS_PFX_PASSWORD) {
-              $certPath = Join-Path $PWD "certificate.pfx"
-              [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($env:WINDOWS_PFX_BASE64))
-              $certPassword = $env:WINDOWS_PFX_PASSWORD
-            } else {
-              Write-Warning "Signing certificate secrets are not configured; generating a temporary self-signed certificate for this workflow run."
+              try {
+                $encodedCert = ($env:WINDOWS_PFX_BASE64 -replace '\s', '')
+                if ($encodedCert) {
+                  $certPath = Join-Path $PWD "certificate.pfx"
+                  [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($encodedCert))
+                  $certPassword = $env:WINDOWS_PFX_PASSWORD
+                  Write-Host "Using provided signing certificate."
+                }
+              } catch {
+                Write-Warning "Provided signing certificate secrets are invalid; generating a temporary self-signed certificate for this workflow run."
+              }
+            }
+
+            if (-not $certPath -or -not $certPassword) {
+              Write-Warning "Signing certificate secrets are not configured or invalid; generating a temporary self-signed certificate for this workflow run."
 
               $tempCertPath = Join-Path $PWD "temporary-sign.pfx"
               $tempPassword = [System.Guid]::NewGuid().ToString()

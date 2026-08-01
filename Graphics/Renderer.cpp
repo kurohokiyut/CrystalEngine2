@@ -7,6 +7,8 @@
 bool Renderer::Initialize()
 {
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     if (!shader.Load(
         "Assets/Shaders/Basic.vert",
@@ -44,14 +46,22 @@ void Renderer::DrawCube()
 {
     shader.Use();
 
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = camera.GetViewMatrix();
-    glm::mat4 projection = camera.GetProjectionMatrix();
+    glm::mat4 model = glm::translate(
+        glm::mat4(1.0f),
+        glm::vec3(0.0f, 0.0f, -2.5f));
 
     model = glm::rotate(
         model,
-        glm::radians(45.0f),
+        glm::radians(35.0f),
         glm::vec3(1.0f, 0.0f, 0.0f));
+
+    model = glm::rotate(
+        model,
+        glm::radians(35.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f));
+
+    glm::mat4 view = camera.GetViewMatrix();
+    glm::mat4 projection = camera.GetProjectionMatrix();
 
     glm::mat4 mvp = projection * view * model;
 

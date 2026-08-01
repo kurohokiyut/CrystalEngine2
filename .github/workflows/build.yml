@@ -7,31 +7,51 @@ on:
 
   workflow_dispatch:
 
-
 jobs:
-
   build-windows:
-
     runs-on: windows-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
+      - name: Build
+        run: cmake --build build --config Release
 
-    - name: Configure CMake
-      run: cmake -S . -B build
+      - name: Package Windows build
+        shell: pwsh
+        run: |
+          $artifactDir = Join-Path $PWD "windows-artifact"
+          New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
 
+          $exeFiles = Get-ChildItem -Path build -Recurse -Filter "*.exe" -File |
+            Where-Object { $_.FullName -notmatch "\\CMakeFiles\\" }
 
-    - name: Build
-      run: cmake --build build --config Release
+          if ($exeFiles.Count -eq 0) {
+            throw "No executable found under build/"
+          }
 
+          foreach ($exe in $exeFiles) {
+            Copy-Item $exe.FullName -Destination $artifactDir -Force
+          }
 
-    - name: Upload Build
-      uses: actions/upload-artifact@v4
-      with:
-        name: CrystalEngine-Windows
-        path: |
-          build/Release/*.exe
-          build/*.exe
+          $notePath = Join-Path $artifactDir "README.txt"
+          @"
+          CrystalEngine Windows build
+          ---------------------------
+          This artifact contains an unsigned CI build.
+          Windows Defender may show a warning for unsigned executables.
+          Download the ZIP and extract it before running.
+          "@ | Set-Content -Path $notePath -Encoding UTF8
+
+          $zipPath = Join-Path $PWD "CrystalEngine-Windows.zip"
+          Compress-Archive -Path "$artifactDir/*" -DestinationPath $zipPath -Force
+
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: CrystalEngine-Windows
+          path: CrystalEngine-Windows.zip

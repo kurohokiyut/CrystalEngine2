@@ -23,6 +23,9 @@ jobs:
 
       - name: Package Windows build
         shell: pwsh
+        env:
+          WINDOWS_PFX_BASE64: ${{ secrets.WINDOWS_PFX_BASE64 }}
+          WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
         run: |
           $artifactDir = Join-Path $PWD "windows-artifact"
           New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
@@ -35,16 +38,35 @@ jobs:
           }
 
           foreach ($exe in $exeFiles) {
-            Copy-Item $exe.FullName -Destination $artifactDir -Force
+            $targetPath = Join-Path $artifactDir $exe.Name
+            Copy-Item $exe.FullName -Destination $targetPath -Force
+
+            if ($env:WINDOWS_PFX_BASE64 -and $env:WINDOWS_PFX_PASSWORD) {
+              $certPath = Join-Path $PWD "certificate.pfx"
+              [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($env:WINDOWS_PFX_BASE64))
+
+              $signtool = Get-Command signtool.exe -ErrorAction SilentlyContinue
+              if ($signtool) {
+                & $signtool.Source sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /f $certPath /p $env:WINDOWS_PFX_PASSWORD $targetPath
+                if ($LASTEXITCODE -ne 0) {
+                  throw "Code signing failed for $targetPath"
+                }
+              } else {
+                Write-Warning "signtool.exe was not found; the artifact will remain unsigned."
+              }
+            } else {
+              Write-Warning "Signing certificate secrets are not configured; the artifact will remain unsigned."
+            }
           }
 
           $notePath = Join-Path $artifactDir "README.txt"
           @"
           CrystalEngine Windows build
           ---------------------------
-          This artifact contains an unsigned CI build.
-          Windows Defender may show a warning for unsigned executables.
-          Download the ZIP and extract it before running.
+          This artifact is built by GitHub Actions.
+          If a code signing certificate is configured via repository secrets,
+          the executable will be signed automatically.
+          Without signing, Windows Defender may still show a warning.
           "@ | Set-Content -Path $notePath -Encoding UTF8
 
           $zipPath = Join-Path $PWD "CrystalEngine-Windows.zip"

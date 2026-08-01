@@ -41,21 +41,45 @@ jobs:
             $targetPath = Join-Path $artifactDir $exe.Name
             Copy-Item $exe.FullName -Destination $targetPath -Force
 
+            $certPath = $null
+            $certPassword = $null
+
             if ($env:WINDOWS_PFX_BASE64 -and $env:WINDOWS_PFX_PASSWORD) {
               $certPath = Join-Path $PWD "certificate.pfx"
               [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($env:WINDOWS_PFX_BASE64))
+              $certPassword = $env:WINDOWS_PFX_PASSWORD
+            } else {
+              Write-Warning "Signing certificate secrets are not configured; generating a temporary self-signed certificate for this workflow run."
 
-              $signtool = Get-Command signtool.exe -ErrorAction SilentlyContinue
-              if ($signtool) {
-                & $signtool.Source sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /f $certPath /p $env:WINDOWS_PFX_PASSWORD $targetPath
-                if ($LASTEXITCODE -ne 0) {
-                  throw "Code signing failed for $targetPath"
-                }
-              } else {
-                Write-Warning "signtool.exe was not found; the artifact will remain unsigned."
+              $tempCertPath = Join-Path $PWD "temporary-sign.pfx"
+              $tempPassword = [System.Guid]::NewGuid().ToString()
+
+              $cert = New-SelfSignedCertificate `
+                -Type CodeSigningCert `
+                -Subject "CN=Crystal Developer Temporary" `
+                -CertStoreLocation "Cert:\CurrentUser\My" `
+                -KeyExportPolicy Exportable `
+                -KeySpec Signature `
+                -KeyLength 2048 `
+                -NotAfter (Get-Date).AddYears(1)
+
+              Export-PfxCertificate `
+                -Cert $cert `
+                -FilePath $tempCertPath `
+                -Password (ConvertTo-SecureString -String $tempPassword -Force -AsPlainText) | Out-Null
+
+              $certPath = $tempCertPath
+              $certPassword = $tempPassword
+            }
+
+            $signtool = Get-Command signtool.exe -ErrorAction SilentlyContinue
+            if ($signtool) {
+              & $signtool.Source sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /f $certPath /p $certPassword $targetPath
+              if ($LASTEXITCODE -ne 0) {
+                throw "Code signing failed for $targetPath"
               }
             } else {
-              Write-Warning "Signing certificate secrets are not configured; the artifact will remain unsigned."
+              Write-Warning "signtool.exe was not found; the artifact will remain unsigned."
             }
           }
 

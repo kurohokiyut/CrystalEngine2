@@ -1,5 +1,7 @@
 #include "Shader.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -174,5 +176,23 @@ void Shader::SetMat4(
         1,
         GL_FALSE,
         glm::value_ptr(matrix)
+    );
+}
+
+void Shader::SetVec3(
+    const std::string& name,
+    const glm::vec3& vector
+)
+{
+    GLint location =
+        glGetUniformLocation(
+            m_Program,
+            name.c_str()
+        );
+
+    glUniform3fv(
+        location,
+        1,
+        glm::value_ptr(vector)
     );
 }

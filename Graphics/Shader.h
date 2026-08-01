@@ -2,6 +2,7 @@
 
 #include <string>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 class Shader
@@ -25,10 +26,14 @@ public:
     }
 
     void SetMat4(
-    const std::string& name,
-    const glm::mat4& matrix
+        const std::string& name,
+        const glm::mat4& matrix
     );
 
+    void SetVec3(
+        const std::string& name,
+        const glm::vec3& vector
+    );
 
 private:
 

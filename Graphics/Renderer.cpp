@@ -30,9 +30,9 @@ bool Renderer::Initialize()
 void Renderer::Begin()
 {
     glClearColor(
-        0.05f,
-        0.05f,
-        0.05f,
+        0.529f,
+        0.808f,
+        0.922f,
         1.0f);
 
     glClear(
@@ -63,11 +63,11 @@ void Renderer::DrawCube()
     glm::mat4 view = camera.GetViewMatrix();
     glm::mat4 projection = camera.GetProjectionMatrix();
 
-    glm::mat4 mvp = projection * view * model;
-
-    shader.SetMat4(
-        "uMVP",
-        mvp);
+    shader.SetMat4("uModel", model);
+    shader.SetMat4("uView", view);
+    shader.SetMat4("uProjection", projection);
+    shader.SetVec3("uLightDir", glm::normalize(glm::vec3(0.5f, 1.0f, 0.3f)));
+    shader.SetVec3("uColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
     cubeMesh.Draw();
 }

@@ -13,18 +13,42 @@ bool CubeMesh::Initialize()
 {
     float vertices[] =
     {
-        // Position (x, y, z) + Color (r, g, b)
+        // Position (x, y, z) + Color (r, g, b) + Normal (x, y, z)
         // Front
-        -0.5f,-0.5f, 0.5f,  1.0f,0.2f,0.2f,
-         0.5f,-0.5f, 0.5f,  1.0f,0.6f,0.2f,
-         0.5f, 0.5f, 0.5f,  1.0f,0.8f,0.2f,
-        -0.5f, 0.5f, 0.5f,  0.8f,0.8f,0.2f,
+        -0.5f,-0.5f, 0.5f,  1.0f,0.2f,0.2f,   0.0f, 0.0f, 1.0f,
+         0.5f,-0.5f, 0.5f,  1.0f,0.6f,0.2f,   0.0f, 0.0f, 1.0f,
+         0.5f, 0.5f, 0.5f,  1.0f,0.8f,0.2f,   0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f,  0.8f,0.8f,0.2f,   0.0f, 0.0f, 1.0f,
 
         // Back
-        -0.5f,-0.5f,-0.5f,  0.2f,0.2f,1.0f,
-         0.5f,-0.5f,-0.5f,  0.2f,0.6f,1.0f,
-         0.5f, 0.5f,-0.5f,  0.2f,0.8f,1.0f,
-        -0.5f, 0.5f,-0.5f,  0.2f,0.8f,0.8f
+        -0.5f,-0.5f,-0.5f,  0.2f,0.2f,1.0f,   0.0f, 0.0f,-1.0f,
+         0.5f,-0.5f,-0.5f,  0.2f,0.6f,1.0f,   0.0f, 0.0f,-1.0f,
+         0.5f, 0.5f,-0.5f,  0.2f,0.8f,1.0f,   0.0f, 0.0f,-1.0f,
+        -0.5f, 0.5f,-0.5f,  0.2f,0.8f,0.8f,   0.0f, 0.0f,-1.0f,
+
+        // Left
+        -0.5f,-0.5f,-0.5f,  0.2f,0.2f,1.0f,  -1.0f, 0.0f, 0.0f,
+        -0.5f,-0.5f, 0.5f,  1.0f,0.2f,0.2f,  -1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f,  0.8f,0.8f,0.2f,  -1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f,-0.5f,  0.2f,0.8f,0.8f,  -1.0f, 0.0f, 0.0f,
+
+        // Right
+         0.5f,-0.5f,-0.5f,  0.2f,0.6f,1.0f,   1.0f, 0.0f, 0.0f,
+         0.5f,-0.5f, 0.5f,  1.0f,0.6f,0.2f,   1.0f, 0.0f, 0.0f,
+         0.5f, 0.5f, 0.5f,  1.0f,0.8f,0.2f,   1.0f, 0.0f, 0.0f,
+         0.5f, 0.5f,-0.5f,  0.2f,0.8f,1.0f,   1.0f, 0.0f, 0.0f,
+
+        // Top
+        -0.5f, 0.5f, 0.5f,  0.8f,0.8f,0.2f,   0.0f, 1.0f, 0.0f,
+         0.5f, 0.5f, 0.5f,  1.0f,0.8f,0.2f,   0.0f, 1.0f, 0.0f,
+         0.5f, 0.5f,-0.5f,  0.2f,0.8f,1.0f,   0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f,-0.5f,  0.2f,0.8f,0.8f,   0.0f, 1.0f, 0.0f,
+
+        // Bottom
+        -0.5f,-0.5f, 0.5f,  1.0f,0.2f,0.2f,   0.0f,-1.0f, 0.0f,
+         0.5f,-0.5f, 0.5f,  1.0f,0.6f,0.2f,   0.0f,-1.0f, 0.0f,
+         0.5f,-0.5f,-0.5f,  0.2f,0.6f,1.0f,   0.0f,-1.0f, 0.0f,
+        -0.5f,-0.5f,-0.5f,  0.2f,0.2f,1.0f,   0.0f,-1.0f, 0.0f,
     };
 
     unsigned int indices[] =
@@ -82,7 +106,7 @@ bool CubeMesh::Initialize()
         3,
         GL_FLOAT,
         GL_FALSE,
-        6*sizeof(float),
+        9*sizeof(float),
         (void*)0);
 
     glEnableVertexAttribArray(0);
@@ -92,10 +116,20 @@ bool CubeMesh::Initialize()
         3,
         GL_FLOAT,
         GL_FALSE,
-        6*sizeof(float),
+        9*sizeof(float),
         (void*)(3*sizeof(float)));
 
     glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(
+        2,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        9*sizeof(float),
+        (void*)(6*sizeof(float)));
+
+    glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
 

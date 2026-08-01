@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "Core/Timer.h"
 #include "Graphics/Window.h"
 #include "Graphics/Renderer.h"
 
@@ -13,6 +14,7 @@ int main()
         return -1;
     }
 
+    Timer timer;
 
     Renderer renderer;
 
@@ -22,11 +24,12 @@ int main()
         return -1;
     }
 
-
     while (!window.ShouldClose())
     {
         window.PollEvents();
 
+        timer.Update();
+        renderer.ProcessInput(window.GetNativeWindow(), timer.GetDeltaTime());
 
         renderer.Begin();
 
@@ -34,15 +37,12 @@ int main()
 
         renderer.End();
 
-
         window.SwapBuffers();
     }
-
 
     renderer.Shutdown();
 
     window.Destroy();
-
 
     return 0;
 }

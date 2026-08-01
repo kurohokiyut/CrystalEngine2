@@ -3,6 +3,9 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "CubeMesh.h"
+#include "PlaneMesh.h"
+
+struct GLFWwindow;
 
 class Renderer
 {
@@ -13,6 +16,8 @@ public:
     void Begin();
 
     void DrawCube();
+
+    void ProcessInput(GLFWwindow* window, float deltaTime);
 
     void End();
 
@@ -25,4 +30,6 @@ private:
     Camera camera;
 
     CubeMesh cubeMesh;
+
+    PlaneMesh floorMesh;
 };

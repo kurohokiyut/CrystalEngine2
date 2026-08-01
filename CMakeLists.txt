@@ -54,6 +54,7 @@ set(SOURCES
     Graphics/Camera.cpp
     Graphics/Mesh.cpp
     Graphics/CubeMesh.cpp
+    Graphics/PlaneMesh.cpp
     Graphics/VertexArray.cpp
     Graphics/VertexBuffer.cpp
     Graphics/IndexBuffer.cpp

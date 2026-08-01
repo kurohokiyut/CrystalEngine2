@@ -1,6 +1,7 @@
 #include "Renderer.h"
 
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -18,6 +19,11 @@ bool Renderer::Initialize()
     }
 
     if (!cubeMesh.Initialize())
+    {
+        return false;
+    }
+
+    if (!floorMesh.Initialize())
     {
         return false;
     }
@@ -46,30 +52,42 @@ void Renderer::DrawCube()
 {
     shader.Use();
 
-    glm::mat4 model = glm::translate(
-        glm::mat4(1.0f),
-        glm::vec3(0.0f, 0.0f, -2.5f));
-
-    model = glm::rotate(
-        model,
-        glm::radians(35.0f),
-        glm::vec3(1.0f, 0.0f, 0.0f));
-
-    model = glm::rotate(
-        model,
-        glm::radians(35.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f));
-
     glm::mat4 view = camera.GetViewMatrix();
     glm::mat4 projection = camera.GetProjectionMatrix();
 
-    shader.SetMat4("uModel", model);
+    glm::mat4 floorModel = glm::translate(
+        glm::mat4(1.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f));
+
+    shader.SetMat4("uModel", floorModel);
     shader.SetMat4("uView", view);
     shader.SetMat4("uProjection", projection);
     shader.SetVec3("uLightDir", glm::normalize(glm::vec3(0.5f, 1.0f, 0.3f)));
     shader.SetVec3("uColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    floorMesh.Draw();
 
+    glm::mat4 cubeModel = glm::translate(
+        glm::mat4(1.0f),
+        glm::vec3(0.0f, 0.5f, 0.0f));
+
+    cubeModel = glm::rotate(
+        cubeModel,
+        glm::radians(20.0f),
+        glm::vec3(1.0f, 0.0f, 0.0f));
+
+    cubeModel = glm::rotate(
+        cubeModel,
+        glm::radians(30.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f));
+
+    shader.SetMat4("uModel", cubeModel);
+    shader.SetVec3("uColor", glm::vec3(0.0f, 0.0f, 0.0f));
     cubeMesh.Draw();
+}
+
+void Renderer::ProcessInput(GLFWwindow* window, float deltaTime)
+{
+    camera.ProcessKeyboard(window, deltaTime);
 }
 
 void Renderer::End()

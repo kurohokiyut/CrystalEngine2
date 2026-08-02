@@ -11,5 +11,11 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    vec3 normal = normalize(vNormal);
+    vec3 lightDir = normalize(-uLightDir);
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = diff * uColor;
+    vec3 ambient = 0.25 * uColor;
+    vec3 result = (ambient + diffuse) * vColor;
+    FragColor = vec4(result, 1.0);
 }
